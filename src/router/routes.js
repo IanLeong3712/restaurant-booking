@@ -3,9 +3,23 @@ const routes = [
     path: "/",
     component: () => import("layouts/MainLayout.vue"),
     children: [
-      { path: "", component: () => import("pages/booking") },
-      { path: "detail", component: () => import("pages/booking/detail") },
-      { path: "finish", component: () => import("pages/booking/finish") }
+      {
+        name: "BookingTime",
+        path: "",
+        component: () => import("pages/booking")
+      },
+      {
+        name: "BookingDetail",
+        path: "detail",
+        props: true,
+        component: () => import("pages/booking/detail")
+      },
+      {
+        name: "BookingOver",
+        path: "thanks",
+        props: true,
+        component: () => import("pages/booking/finish")
+      }
     ]
   },
 

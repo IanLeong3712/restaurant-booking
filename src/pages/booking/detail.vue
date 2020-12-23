@@ -30,7 +30,7 @@
     </q-carousel>
     <div class="row q-col-gutter-md q-px-lg">
       <div
-        class="flex q-mx-auto column  col-6"
+        class="flex q-mx-auto column  col-xs-12  col-sm-6"
         style="max-width: 636px;width: 100%"
       >
         <h2
@@ -40,7 +40,7 @@
           快要完成了!
         </h2>
         <h1 class="text-h4 text-weight-bold" style="color: #2d333f">
-          日初午訪 Noon Brunch
+          {{ restaurantInfo.name }}
         </h1>
 
         <div class="flex row">
@@ -49,7 +49,7 @@
             style="color:#2d333f;font-size: 1.2rem;"
           >
             <q-icon class="q-mr-sm" name="today" />
-            <span> 12月25日 週五 </span>
+            <span> {{ timeForm.date.format("MM月DD日 ddd") }} </span>
           </div>
 
           <div
@@ -57,7 +57,7 @@
             style="color:#2d333f;font-size: 1.2rem;"
           >
             <q-icon class="q-mr-sm" name="schedule" />
-            <span> 1:30 下午 </span>
+            <span> {{ timeForm.time }} </span>
           </div>
 
           <div
@@ -65,16 +65,23 @@
             style="color:#2d333f;font-size: 1.2rem;"
           >
             <q-icon class="q-mr-sm" name="person" />
-            <span> 2大 3小 </span>
+            <span>
+              {{ timeForm.adult }} 位大人 {{ timeForm.children }} 位小孩
+            </span>
           </div>
         </div>
 
         <hr />
 
         <div class="subtitle">聯絡資訊</div>
-        <form class="row q-col-gutter-md">
+        <q-form class="row q-col-gutter-md" ref="contactForm">
           <div class="col-sm-6 col-xs-12">
-            <q-input outlined v-model="form.name" label="訂位人姓名" />
+            <q-input
+              outlined
+              v-model="form.name"
+              :rules="[val => (val && val.length > 0) || '請輸入訂位人姓名']"
+              label="訂位人姓名*"
+            />
           </div>
           <div class="col-sm-6  col-xs-12">
             <q-option-group
@@ -87,10 +94,32 @@
             />
           </div>
           <div class="col-sm-6 col-xs-12">
-            <q-input outlined v-model="form.phone" label="聯絡電話" />
+            <q-input
+              outlined
+              v-model="form.phone"
+              :maxlength="10"
+              :rules="[
+                val =>
+                  (val && /^09[0-9]{8}$/.test(val)) || '請輸入訂位人手機號碼'
+              ]"
+              label="聯絡手機號碼*"
+            />
           </div>
           <div class="col-sm-6 col-xs-12">
-            <q-input outlined v-model="form.email" label="Email(非必填)" />
+            <q-input
+              outlined
+              v-model="form.email"
+              label="Email"
+              type="email"
+              :rules="[
+                val =>
+                  val.length === 0 ||
+                  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(
+                    val
+                  ) ||
+                  '請輸入有效 Email'
+              ]"
+            />
           </div>
           <div class="col-12">
             <q-select
@@ -99,7 +128,7 @@
               :options="occasion"
               multiple
               use-chips
-              label="用餐目的(非必填)"
+              label="用餐目的"
             />
           </div>
           <div class="col-12">
@@ -108,17 +137,18 @@
               filled
               clearable
               type="textarea"
-              label="其他備註"
+              label="其他備註(ex.如果需兒童椅 請提出需求)"
             />
           </div>
-        </form>
+        </q-form>
         <q-btn
           color="primary"
           unelevated
           size="1.1rem"
           class="q-mt-lg "
-          @click="$router.push('finish')"
+          @click="next"
           label="確認訂位"
+          :loading="loading"
         />
         <q-btn
           color="grey"
@@ -126,12 +156,13 @@
           size="1.1rem"
           class="q-mt-md "
           @click="$router.push('/')"
+          :disable="loading"
           label="回上一步"
         />
       </div>
 
       <div
-        class="flex q-mx-auto column  col-6"
+        class="flex q-mx-auto column col-xs-12  col-sm-6"
         style="max-width: 302px;width: 100%"
       ></div>
     </div>
@@ -139,39 +170,20 @@
 </template>
 
 <script>
-const locale = {
-  months: [
-    "一月",
-    "二月",
-    "三月",
-    "四月",
-    "五月",
-    "六月",
-    "七月",
-    "八月",
-    "九月",
-    "十月",
-    "十一月",
-    "十二月"
-  ],
-  days: ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"],
-  daysShort: ["日", "一", "二", "三", "四", "五", "六"]
-};
 export default {
-  name: "PageIndex",
+  name: "BookingDetail",
+  props: {
+    timeForm: Object
+  },
   data() {
     return {
+      loading: false,
       slide: 1,
-      peopleSelect: [1, 2, 3, 4, 5, 6, 7, 8],
       form: {
-        adult: 1,
-        children: 0,
-        date: new Date().toLocaleDateString(),
-        time: undefined,
         name: "",
         email: "",
         phone: "",
-        occasion: undefined,
+        occasion: [],
         gender: 1,
         comment: ""
       },
@@ -189,42 +201,40 @@ export default {
           label: "其他",
           value: 3
         }
-      ],
-
-      timeout1: ["08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30"],
-      timeout2: [
-        "12:00",
-        "12:30",
-        "13:00",
-        "13:30",
-        "14:00",
-        "14:30",
-        "15:00",
-        "15:30"
-      ],
-
-      myLocale: {
-        days: locale.days,
-        daysShort: locale.daysShort,
-        months: locale.months,
-        monthsShort: locale.months
-      }
+      ]
     };
   },
+  created() {
+    if (!this.timeForm) {
+      this.$router.replace({ name: "BookingTime" });
+    }
+  },
   computed: {
-    formatDate() {
-      return this.$dayjs(this.form.date).format("YYYY/MM/DD ddd");
-    },
-    dateOptions() {
-      const result = [];
-      for (let i = 0; i < 30; i++) {
-        result.push(
-          this.$dayjs()
-            .add(i, "day")
-            .format("YYYY/MM/DD")
-        );
+    restaurantInfo() {
+      return this.$store.state.restaurant.info;
+    }
+  },
+  methods: {
+    async next() {
+      const form = {
+        ...this.form,
+        adult: this.timeForm.adult,
+        children: this.timeForm.children,
+        time: new Date(
+          this.timeForm.date.format("YYYY/MM/DD ") + this.timeForm.time
+        ).getTime()
+      };
+      if (await this.$refs.contactForm.validate()) {
+        this.loading = true;
+        const res = await this.$axios.post("/booking", form);
+        window.localStorage.setItem("id", res.data.data.id);
+        window.localStorage.setItem("phone", res.data.data.phone);
+        this.$router.push({
+          name: "BookingOver",
+          params: { bookingInfo: res.data.data }
+        });
+        this.loading = false;
       }
-      return result;
     }
   }
 };

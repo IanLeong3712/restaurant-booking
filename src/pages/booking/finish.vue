@@ -11,12 +11,8 @@
         <q-icon size="3rem" name="check_circle" />
       </div>
       <div>
-        <div>
-          謝謝, 王曉明 先生! 您的訂位已經完成.
-        </div>
-        <div>
-          訂位資訊 #1
-        </div>
+        <div>謝謝, {{ bookingInfo.name }} 先生! 您的訂位已經完成.</div>
+        <div>訂位資訊 #{{ bookingInfo.id }}</div>
       </div>
     </div>
 
@@ -35,7 +31,7 @@
             style="color:#2d333f;font-size: 1.2rem;"
           >
             <q-icon class="q-mr-sm" name="today" />
-            <span> 12月25日 週五 </span>
+            <span> {{ formatDate.format("MM月DD日 ddd") }} </span>
           </div>
 
           <div
@@ -43,7 +39,7 @@
             style="color:#2d333f;font-size: 1.2rem;"
           >
             <q-icon class="q-mr-sm" name="schedule" />
-            <span> 1:30 下午 </span>
+            <span> {{ formatDate.format("HH:mm") }} </span>
           </div>
 
           <div
@@ -51,7 +47,12 @@
             style="color:#2d333f;font-size: 1.2rem;"
           >
             <q-icon class="q-mr-sm" name="person" />
-            <span> 2大 3小 </span>
+            <span>
+              {{ bookingInfo.adult }} 位大人
+              <template v-if="bookingInfo.children > 0">
+                {{ bookingInfo.children }} 位小孩
+              </template>
+            </span>
           </div>
         </div>
         <hr />
@@ -64,7 +65,7 @@
               <q-icon class="q-mr-sm" name="map" />
               <span> 位置</span>
             </div>
-            <div style="font-size: 1rem">台南市北區育德二路261號</div>
+            <div style="font-size: 1rem">{{ restaurantInfo.address }}</div>
 
             <div
               class="flex items-center subtitle q-mt-lg"
@@ -73,7 +74,7 @@
               <q-icon class="q-mr-sm" name="phone" />
               <span> 聯絡電話</span>
             </div>
-            <div style="font-size: 1rem">06-2810982</div>
+            <div style="font-size: 1rem">{{ restaurantInfo.phone }}</div>
           </div>
 
           <div class="col-xs-12 col-sm-7">
@@ -82,7 +83,10 @@
               height="100%"
               frameborder="0"
               style="border:0"
-              src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDo2x7y_CQ1kKCoO0PCVqEzmhrgsfa0_6g&q=Space+Needle,Seattle+WA"
+              :src="
+                'https://www.google.com/maps/embed/v1/place?key=AIzaSyDo2x7y_CQ1kKCoO0PCVqEzmhrgsfa0_6g&q=' +
+                  restaurantInfo.address
+              "
               allowfullscreen
             >
             </iframe>
@@ -98,7 +102,7 @@
             size="1.1rem"
             class="q-mr-md"
             label="取消訂位"
-            @click="$router.push('/')"
+            @click="cancel"
           />
         </div>
       </div>
@@ -131,23 +135,12 @@ const locale = {
   daysShort: ["日", "一", "二", "三", "四", "五", "六"]
 };
 export default {
-  name: "PageIndex",
+  name: "BookingThanks",
+  props: {
+    bookingInfo: Object
+  },
   data() {
     return {
-      slide: 1,
-      peopleSelect: [1, 2, 3, 4, 5, 6, 7, 8],
-      form: {
-        adult: 1,
-        children: 0,
-        date: new Date().toLocaleDateString(),
-        time: undefined,
-        name: "",
-        email: "",
-        phone: "",
-        occasion: undefined,
-        gender: 1,
-        comment: ""
-      },
       occasion: ["慶生", "約會", "周年慶", "家庭用餐", "朋友聚餐", "商務聚餐"],
       options: [
         {
@@ -162,42 +155,41 @@ export default {
           label: "其他",
           value: 3
         }
-      ],
-
-      timeout1: ["08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30"],
-      timeout2: [
-        "12:00",
-        "12:30",
-        "13:00",
-        "13:30",
-        "14:00",
-        "14:30",
-        "15:00",
-        "15:30"
-      ],
-
-      myLocale: {
-        days: locale.days,
-        daysShort: locale.daysShort,
-        months: locale.months,
-        monthsShort: locale.months
-      }
+      ]
     };
   },
+  created() {
+    if (!this.bookingInfo) {
+      this.$router.push("/");
+      return;
+    }
+    if (this.bookingInfo.delete) {
+      this.$router.push("/");
+      return;
+    }
+  },
   computed: {
-    formatDate() {
-      return this.$dayjs(this.form.date).format("YYYY/MM/DD ddd");
+    restaurantInfo() {
+      return this.$store.state.restaurant.info;
     },
-    dateOptions() {
-      const result = [];
-      for (let i = 0; i < 30; i++) {
-        result.push(
-          this.$dayjs()
-            .add(i, "day")
-            .format("YYYY/MM/DD")
-        );
-      }
-      return result;
+    formatDate() {
+      return this.$dayjs(this.bookingInfo.time);
+    }
+  },
+  methods: {
+    async cancel() {
+      const res = await this.$axios.post(
+        `/booking/${this.bookingInfo.id}/cancel`,
+        {
+          phone: this.bookingInfo.phone
+        }
+      );
+      this.booking = res.data.data;
+      this.loading = false;
+
+      window.localStorage.clear("phone");
+      window.localStorage.clear("id");
+      this.$router.push("/");
     }
   }
 };

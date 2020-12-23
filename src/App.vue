@@ -1,6 +1,6 @@
 <template>
-  <div id="q-app" style="background-color: #f1f2f4;">
-    <router-view />
+  <div id="q-app" style="background-color: #ECECEC;">
+    <router-view></router-view>
   </div>
 </template>
 <script>
