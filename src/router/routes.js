@@ -19,6 +19,11 @@ const routes = [
         path: "thanks",
         props: true,
         component: () => import("pages/booking/finish")
+      },
+      {
+        name: "Admin",
+        path: "admin",
+        component: () => import("pages/admin")
       }
     ]
   },

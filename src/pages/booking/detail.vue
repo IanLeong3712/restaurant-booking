@@ -9,25 +9,19 @@
       arrows
       navigation
       infinite
-      style="width: 100%;max-height: 512px;"
+      style="width: 100%;max-height: 512px;height: auto;"
     >
       <q-carousel-slide
-        :name="1"
-        img-src="https://resizer.otstatic.com/v2/photos/wide-huge/1/31667434.jpg"
-      />
-      <q-carousel-slide
-        :name="2"
-        img-src="https://cdn.quasar.dev/img/parallax1.jpg"
-      />
-      <q-carousel-slide
-        :name="3"
-        img-src="https://cdn.quasar.dev/img/parallax2.jpg"
-      />
-      <q-carousel-slide
-        :name="4"
-        img-src="https://cdn.quasar.dev/img/quasar.jpg"
-      />
+        :name="i"
+        v-for="(image, i) in slideImages"
+        :key="image"
+        style="padding: 0"
+        class="column no-wrap flex-center"
+      >
+        <q-img :src="image" :ratio="16 / 9" />
+      </q-carousel-slide>
     </q-carousel>
+
     <div class="row q-col-gutter-md q-px-lg">
       <div
         class="flex q-mx-auto column  col-xs-12  col-sm-6"
@@ -109,14 +103,14 @@
             <q-input
               outlined
               v-model="form.email"
-              label="Email"
+              label="Email*"
               type="email"
               :rules="[
                 val =>
-                  val.length === 0 ||
-                  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(
-                    val
-                  ) ||
+                  (val &&
+                    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(
+                      val
+                    )) ||
                   '請輸入有效 Email'
               ]"
             />
@@ -177,6 +171,11 @@ export default {
   },
   data() {
     return {
+      slideImages: [
+        "https://booking.ianleong3712.space/16x9/16x9_04.jpg",
+        "https://booking.ianleong3712.space/16x9/16x9_05.jpg",
+        "https://booking.ianleong3712.space/16x9/16x9_06.jpg"
+      ],
       loading: false,
       slide: 1,
       form: {
@@ -199,7 +198,7 @@ export default {
         },
         {
           label: "其他",
-          value: 3
+          value: 2
         }
       ]
     };
@@ -226,14 +225,24 @@ export default {
       };
       if (await this.$refs.contactForm.validate()) {
         this.loading = true;
-        const res = await this.$axios.post("/booking", form);
-        window.localStorage.setItem("id", res.data.data.id);
-        window.localStorage.setItem("phone", res.data.data.phone);
-        this.$router.push({
-          name: "BookingOver",
-          params: { bookingInfo: res.data.data }
-        });
-        this.loading = false;
+        try {
+          const res = await this.$axios.post("/booking", form);
+          window.localStorage.setItem("id", res.data.data.id);
+          window.localStorage.setItem("phone", res.data.data.phone);
+          this.$router.push({
+            name: "BookingOver",
+            params: { bookingInfo: res.data.data }
+          });
+        } catch (error) {
+          console.log(error);
+          this.$q.notify({
+            type: "negative",
+            message: `伺服器繁忙, 請稍後重試!`,
+            timeout: 500
+          });
+        } finally {
+          this.loading = false;
+        }
       }
     }
   }

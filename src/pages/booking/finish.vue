@@ -4,14 +4,17 @@
     style="max-width: 636px;padding-bottom: 5vh"
   >
     <div
-      class="row q-col-gutter-md q-pa-sm q-pb-lg q-pt-md"
+      class="row q-col-gutter-md q-pa-sm q-pb-lg q-pt-md items-center"
       style="background: #55b68d;color: #fff;"
     >
       <div>
-        <q-icon size="3rem" name="check_circle" />
+        <q-icon size="4rem" name="check_circle" />
       </div>
-      <div>
-        <div>謝謝, {{ bookingInfo.name }} 先生! 您的訂位已經完成.</div>
+      <div style="font-size: 15px">
+        <div>
+          謝謝, {{ bookingInfo.name }} {{ genderOptions[bookingInfo.gender] }}!
+          您的訂位已經完成.
+        </div>
         <div>訂位資訊 #{{ bookingInfo.id }}</div>
       </div>
     </div>
@@ -55,6 +58,40 @@
             </span>
           </div>
         </div>
+
+        <hr />
+        <div class="row q-col-gutter-lg">
+          <div>
+            <div
+              class="flex items-center subtitle"
+              style="color:#2d333f;font-size: 1.1rem;"
+            >
+              <span> 聯絡人姓名</span>
+            </div>
+            <div style="font-size: 1rem">
+              {{ bookingInfo.name }} {{ genderOptions[bookingInfo.gender] }}
+            </div>
+
+            <div
+              class="flex items-center subtitle q-mt-lg"
+              style="color:#2d333f;font-size: 1.1rem;"
+            >
+              <span> 聯絡電話</span>
+            </div>
+            <div style="font-size: 1rem">{{ bookingInfo.phone }}</div>
+
+            <div
+              v-if="bookingInfo.comment.length > 0"
+              class="flex items-center subtitle q-mt-lg"
+              style="color:#2d333f;font-size: 1.1rem;"
+            >
+              <span> 備註訊息</span>
+            </div>
+            <div v-if="bookingInfo.comment.length > 0" style="font-size: 1rem">
+              {{ bookingInfo.comment }}
+            </div>
+          </div>
+        </div>
         <hr />
         <div class="row q-col-gutter-lg">
           <div class="col-xs-12 col-sm-5">
@@ -62,7 +99,6 @@
               class="flex items-center subtitle"
               style="color:#2d333f;font-size: 1.1rem;"
             >
-              <q-icon class="q-mr-sm" name="map" />
               <span> 位置</span>
             </div>
             <div style="font-size: 1rem">{{ restaurantInfo.address }}</div>
@@ -94,6 +130,7 @@
         </div>
 
         <hr />
+
         <div>
           <q-btn
             color="primary"
@@ -105,6 +142,10 @@
             @click="cancel"
           />
         </div>
+
+        <span style="color:#888;margin-top:1rem">
+          *如需預約其他時段，請取消訂位後重新進行預約
+        </span>
       </div>
 
       <div
@@ -142,20 +183,7 @@ export default {
   data() {
     return {
       occasion: ["慶生", "約會", "周年慶", "家庭用餐", "朋友聚餐", "商務聚餐"],
-      options: [
-        {
-          label: "先生",
-          value: 1
-        },
-        {
-          label: "小姐",
-          value: 0
-        },
-        {
-          label: "其他",
-          value: 3
-        }
-      ]
+      genderOptions: ["小姐", "先生", ""]
     };
   },
   created() {

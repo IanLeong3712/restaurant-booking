@@ -1,6 +1,6 @@
 {
   "name": "restaurant-booking",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A Quasar Framework app",
   "productName": "日初午訪 | Noon Brunch",
   "author": "ianleong3712 <ianleong3712@gmail.com>",
@@ -10,7 +10,8 @@
     "build": "quasar build",
     "build:pwa": "quasar build -m pwa",
     "lint": "eslint --ext .js,.vue ./",
-    "test": "echo \"No test specified\" && exit 0"
+    "test": "echo \"No test specified\" && exit 0",
+    "deploy": "quasar build && scp -r ./dist/spa/ root@172.104.116.45:/data/wwwroot/booking.ianleong3712.space"
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",

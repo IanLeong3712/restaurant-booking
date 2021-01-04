@@ -9,24 +9,17 @@
       arrows
       navigation
       infinite
-      style="width: 100%;max-height: 512px;"
+      style="width: 100%;max-height: 512px;height: auto;"
     >
       <q-carousel-slide
-        :name="1"
-        img-src="https://resizer.otstatic.com/v2/photos/wide-huge/1/31667434.jpg"
-      />
-      <q-carousel-slide
-        :name="2"
-        img-src="https://cdn.quasar.dev/img/parallax1.jpg"
-      />
-      <q-carousel-slide
-        :name="3"
-        img-src="https://cdn.quasar.dev/img/parallax2.jpg"
-      />
-      <q-carousel-slide
-        :name="4"
-        img-src="https://cdn.quasar.dev/img/quasar.jpg"
-      />
+        :name="i"
+        v-for="(image, i) in slideImages"
+        :key="image"
+        style="padding: 0"
+        class="column no-wrap flex-center"
+      >
+        <q-img :src="image" :ratio="16 / 9" />
+      </q-carousel-slide>
     </q-carousel>
 
     <div class="flex q-mx-auto column q-px-lg" style="max-width: 992px">
@@ -45,8 +38,11 @@
             style="color:#2d333f;font-size: 1.3rem;"
             name="call"
           />
-          <span style="color:#da3743;font-size: 1.2rem;">
-            {{ restaurantInfo.phone }}</span
+          <a
+            style="color:#da3743;font-size: 1.2rem;"
+            :href="'tel:' + restaurantInfo.phone"
+          >
+            {{ restaurantInfo.phone }}</a
           >
         </div>
         <div class="flex items-center">
@@ -102,6 +98,7 @@
           </div>
         </div>
       </div>
+      <span style="color:#888">*預約人數超過 6 人時, 請致電聯絡</span>
       <hr />
       <div class="subtitle">用餐時段</div>
       <template v-if="loading">
@@ -124,17 +121,20 @@
               :key="time.label"
               :label="time.label"
               :disable="
-                time.value + time.current + form.adult + form.children > 8
+                time.value + time.current + form.adult + form.children > 6
               "
               :class="{
                 'text-decoration':
-                  time.value + time.current + form.adult + form.children > 8
+                  time.value + time.current + form.adult + form.children > 6
               }"
             />
           </div>
         </template>
 
         <span style="color:#888">*預約時段只保留10分鐘 有特殊需求請致電</span>
+        <span style="color:#888"
+          >*如該時段無法選擇, 則表示該時段已額滿, 有特殊需求請致電</span
+        >
       </template>
       <hr />
 
@@ -147,27 +147,20 @@
 
       <q-carousel
         animated
-        v-model="slide"
+        v-model="slide2"
         arrows
         infinite
-        style="width: 100%;height: 512px;"
+        style="width: 100%;height: auto;"
       >
         <q-carousel-slide
-          :name="1"
-          img-src="https://resizer.otstatic.com/v2/photos/wide-huge/1/31667434.jpg"
-        />
-        <q-carousel-slide
-          :name="2"
-          img-src="https://cdn.quasar.dev/img/parallax1.jpg"
-        />
-        <q-carousel-slide
-          :name="3"
-          img-src="https://cdn.quasar.dev/img/parallax2.jpg"
-        />
-        <q-carousel-slide
-          :name="4"
-          img-src="https://cdn.quasar.dev/img/quasar.jpg"
-        />
+          :name="i"
+          v-for="(image, i) in slideImages2"
+          :key="image"
+          style="padding: 0"
+          class="column no-wrap flex-center"
+        >
+          <q-img :src="image" :ratio="4 / 3" />
+        </q-carousel-slide>
       </q-carousel>
     </div>
 
@@ -190,6 +183,7 @@
 </template>
 
 <script>
+import dayjs from "dayjs";
 import RestaurantInfo from "./components/restaurantInfo";
 const locale = {
   months: [
@@ -214,19 +208,27 @@ export default {
   components: { RestaurantInfo },
   data() {
     return {
+      slideImages: [
+        "https://booking.ianleong3712.space/16x9/16x9_04.jpg",
+        "https://booking.ianleong3712.space/16x9/16x9_05.jpg",
+        "https://booking.ianleong3712.space/16x9/16x9_06.jpg"
+      ],
+      slideImages2: [
+        "https://booking.ianleong3712.space/4x3/4x3_02.jpg",
+        "https://booking.ianleong3712.space/4x3/4x3_03.jpg",
+        "https://booking.ianleong3712.space/4x3/4x3_01.jpg"
+      ],
       slide: 1,
+      slide2: 1,
       loading: true,
-      peopleSelect: [1, 2, 3, 4, 5, 6, 7, 8],
+      peopleSelect: [1, 2, 3, 4, 5, 6],
       booking: {},
       form: {
         adult: 2,
         children: 0,
-        date: this.$dayjs(),
+        date: this.$dayjs().add(1, "days"),
         time: undefined
       },
-
-      timeout1: ["08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30"],
-      timeout2: ["12:00", "12:30", "13:00", "13:30", "14:00", "14:30"],
 
       timeOptionsDefault: [
         {
@@ -262,6 +264,7 @@ export default {
         window.localStorage.clear("id");
       }
     }
+
     this.getBooking();
   },
   watch: {
@@ -291,7 +294,7 @@ export default {
     },
     dateOptions() {
       const result = [];
-      for (let i = 0; i < 30; i++) {
+      for (let i = 1; i <= 30; i++) {
         result.push(
           this.$dayjs()
             .add(i, "day")
@@ -315,17 +318,23 @@ export default {
         try {
           _d[i + 1].current += x.value;
           _d[i + 2].current += x.value;
-          _d[i + 3].current += x.value;
           _d[i - 1].current += x.value;
           _d[i - 2].current += x.value;
-          _d[i - 3].current += x.value;
         } catch (error) {}
       });
 
       result.forEach(time => {
         time.options.map((x, i) => {
           const data = _d.find(j => j.label === x.label);
-          x.current = data.current;
+          if (
+            this.$dayjs().isAfter(
+              this.$dayjs(this.form.date.format("YYYY/MM/DD ") + data.label)
+            )
+          ) {
+            x.current = 999;
+          } else {
+            x.current = data.current;
+          }
         });
       });
 
@@ -339,7 +348,6 @@ export default {
           phone: data.phone
         }
       });
-      console.log(res.data.data);
       return res.data.data;
     },
     async getBooking() {
