@@ -8,9 +8,9 @@
       style="background: #55b68d;color: #fff;"
     >
       <div>
-        <q-icon size="4rem" name="check_circle" />
+        <q-icon size="6rem" name="check_circle" />
       </div>
-      <div style="font-size: 15px">
+      <div style="font-size: 16px">
         <div>
           謝謝, {{ bookingInfo.name }} {{ genderOptions[bookingInfo.gender] }}!
           您的訂位已經完成.
