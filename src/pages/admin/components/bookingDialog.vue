@@ -126,8 +126,26 @@
       <q-separator />
 
       <q-card-actions align="right">
-        <q-btn flat label="關閉" color="primary" v-close-popup />
-        <q-btn @click="booking" label="保存" color="primary" />
+        <q-btn
+          v-if="data.id"
+          label="取消預約"
+          color="grey"
+          @click="unbooking"
+          :loading="loading"
+        />
+        <q-btn
+          :loading="loading"
+          flat
+          label="關閉"
+          color="primary"
+          @click="close"
+        />
+        <q-btn
+          :loading="loading"
+          @click="booking"
+          label="保存"
+          color="primary"
+        />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -135,13 +153,13 @@
 
 <script>
 export default {
-  props: ["token"],
+  props: ["token", "dialog", "data"],
   data() {
     return {
       form: {
         adult: 2,
         children: 0,
-        date: this.$dayjs().add(1, "days"),
+        date: this.$dayjs().add(1, "day"),
         time: undefined,
         name: "",
         email: "",
@@ -150,8 +168,7 @@ export default {
         gender: 1,
         comment: ""
       },
-      dialog: true,
-      loading: true,
+      loading: false,
       peopleSelect: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
       timeSelect: [
         "08:30",
@@ -186,8 +203,19 @@ export default {
     };
   },
 
-  created() {},
-  watch: {},
+  created() {
+    if (this.data.id) {
+      this.form = this.data;
+    } else if (this.data.time) {
+      this.form.date = this.data.date;
+      this.form.time = this.data.time;
+    }
+  },
+  watch: {
+    dialog() {
+      this.reset();
+    }
+  },
   computed: {
     formatDate: {
       get() {
@@ -207,9 +235,99 @@ export default {
         );
       }
       return result;
+    },
+    tokenString() {
+      return btoa(
+        unescape(
+          encodeURIComponent(this.token + ":" + new Date().getTime()).replace(
+            /=/g,
+            ""
+          )
+        )
+      );
     }
   },
   methods: {
+    close() {
+      this.$emit("close-dialog");
+    },
+    reset() {
+      this.form = {
+        adult: 2,
+        children: 0,
+        date: this.$dayjs().add(1, "days"),
+        time: undefined,
+        name: "",
+        email: "",
+        phone: "",
+        occasion: [],
+        gender: 1,
+        comment: ""
+      };
+    },
+    async unbooking() {
+      this.$q
+        .dialog({
+          title: "取消預約",
+          message: "是否確定要取消該預約?",
+          cancel: true,
+          persistent: true
+        })
+        .onOk(async () => {
+          this.loading = true;
+
+          try {
+            const res = await this.$axios.post(
+              "/pd/booking/unbooking/" + this.data.id,
+              { token: this.tokenString }
+            );
+            this.reset();
+            this.$emit("close-dialog", true);
+          } catch (error) {
+            this.$q.notify({
+              type: "negative",
+              message: `伺服器繁忙, 請稍後重試!`,
+              timeout: 500
+            });
+          } finally {
+            this.loading = false;
+          }
+        });
+    },
+    async update(form) {
+      this.loading = true;
+
+      try {
+        const res = await this.$axios.put("/pd/booking/" + this.data.id, form);
+        this.reset();
+        this.$emit("close-dialog", true);
+      } catch (error) {
+        this.$q.notify({
+          type: "negative",
+          message: error.response.data.message || `伺服器繁忙, 請稍後重試!`,
+          timeout: 500
+        });
+      } finally {
+        this.loading = false;
+      }
+    },
+    async create(form) {
+      this.loading = true;
+
+      try {
+        const res = await this.$axios.post("/pd/booking", form);
+        this.reset();
+        this.$emit("close-dialog", true);
+      } catch (error) {
+        this.$q.notify({
+          type: "negative",
+          message: error.response.data.message || `伺服器繁忙, 請稍後重試!`,
+          timeout: 500
+        });
+      } finally {
+        this.loading = false;
+      }
+    },
     async booking() {
       if (!this.form.time) {
         return this.$q.notify({
@@ -220,32 +338,21 @@ export default {
       }
 
       if (await this.$refs.contactForm.validate()) {
-        this.loading = true;
-
-        const token = btoa(this.token + ":" + new Date().getTime()).replaceAll(
-          "=",
-          ""
-        );
-
         const form = {
           ...this.form,
           time: new Date(
             this.form.date.format("YYYY/MM/DD ") + this.form.time
           ).getTime(),
-          token
+          token: this.tokenString
         };
         delete form.date;
-        try {
-          const res = await this.$axios.post("/booking/admin/create", form);
-        } catch (error) {
-          this.$q.notify({
-            type: "negative",
-            message: `伺服器繁忙, 請稍後重試!`,
-            timeout: 500
-          });
-        } finally {
-          this.loading = false;
+
+        if (this.data.id) {
+          await this.update(form);
+        } else {
+          await this.create(form);
         }
+        // window.location.reload();
       }
     }
   }

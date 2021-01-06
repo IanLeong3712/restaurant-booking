@@ -189,12 +189,12 @@ export default {
       occasion: ["慶生", "約會", "周年慶", "家庭用餐", "朋友聚餐", "商務聚餐"],
       options: [
         {
-          label: "先生",
-          value: 1
-        },
-        {
           label: "小姐",
           value: 0
+        },
+        {
+          label: "先生",
+          value: 1
         },
         {
           label: "其他",
