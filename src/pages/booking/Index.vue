@@ -98,7 +98,7 @@
           </div>
         </div>
       </div>
-      <span style="color:#888">*預約人數超過 6 人時, 請致電聯絡</span>
+      <span style="color:#888">*預約人數超過 10 人時, 請致電聯絡</span>
       <hr />
       <div class="subtitle">用餐時段</div>
       <template v-if="loading">
@@ -121,11 +121,11 @@
               :key="time.label"
               :label="time.label"
               :disable="
-                time.value + time.current + form.adult + form.children > 6
+                time.value + time.current + form.adult + form.children > 10
               "
               :class="{
                 'text-decoration':
-                  time.value + time.current + form.adult + form.children > 6
+                  time.value + time.current + form.adult + form.children > 10
               }"
             />
           </div>
@@ -221,7 +221,7 @@ export default {
       slide: 1,
       slide2: 1,
       loading: true,
-      peopleSelect: [1, 2, 3, 4, 5, 6],
+      peopleSelect: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       booking: {},
       form: {
         adult: 2,

@@ -129,9 +129,9 @@
                   style="align-items: center;"
                   :class="{
                     'card-grey': props.row.total == 0,
-                    'card-green': props.row.total >= 1 && props.row.total <= 3,
-                    'card-yellow': props.row.total >= 4 && props.row.total <= 5,
-                    'card-red': props.row.total >= 6
+                    'card-green': props.row.total >= 1 && props.row.total <= 5,
+                    'card-yellow': props.row.total >= 6 && props.row.total <= 9,
+                    'card-red': props.row.total >= 10
                   }"
                 >
                   <div style="font-size: 1.2rem">
