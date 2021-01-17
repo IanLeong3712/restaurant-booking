@@ -107,6 +107,18 @@
           hide-bottom
           :loading="loading"
         >
+          <template v-slot:top>
+            <div class="col-2 q-table__title">{{ order.label }}</div>
+
+            <q-space />
+
+            <q-btn
+              label="本日休息"
+              color="primary"
+              @click="setDayOff(order.label)"
+              :disable="order.data.some(x => x.status === 'DayOff')"
+            />
+          </template>
           <template v-slot:item="props">
             <div
               class="q-pa-xs col-xs-12 col-sm-4 col-md-3 col-lg-2 grid-style-transition"
@@ -303,9 +315,7 @@ export default {
 
   created() {
     const token = window.localStorage.getItem("token");
-    if (!token) {
-      return;
-    } else if (!this.testPassword(token)) {
+    if (!token || !this.testPassword(token)) {
       return;
     }
     this.token = token;
@@ -322,7 +332,7 @@ export default {
     }
 
     this.passwordDialog = false;
-    // this.getBooking();
+    this.getBooking();
   },
   watch: {
     "form.date"(value) {
@@ -343,12 +353,23 @@ export default {
       const endAt = this.$dayjs(this.form.date.to);
 
       return startAt.format("MM/DD") + " - " + endAt.format("MM/DD");
+    },
+    tokenString() {
+      return btoa(
+        unescape(
+          encodeURIComponent(this.token + ":" + new Date().getTime()).replace(
+            /=/g,
+            ""
+          )
+        )
+      );
     }
   },
   methods: {
     exportCSV() {
       const rows = this.booking.reduce((a, b) => {
         b.data
+          .filter(x => x.status !== "DayOff")
           .sort((a, b) => a.time - b.time)
           .forEach(data => {
             a.push({
@@ -453,6 +474,64 @@ export default {
     },
     testPassword(password) {
       return password === "NjchITY3Kio=";
+    },
+    setDayOff(day) {
+      const timeOptions = [
+        "08:30",
+        "09:00",
+        "09:30",
+        "10:00",
+        "10:30",
+        "11:00",
+        "11:30",
+        "12:00",
+        "12:30",
+        "13:00",
+        "13:30",
+        "14:00",
+        "14:30"
+      ];
+      const form = {
+        adult: 99,
+        children: 99,
+        time: undefined,
+        status: "DayOff",
+        name: "",
+        email: "",
+        phone: "",
+        occasion: [],
+        gender: 1,
+        comment: "[本日休息]",
+        token: this.tokenString
+      };
+      const data = timeOptions.map(x => ({
+        ...form,
+        time: new Date(`${day} ${x}`).getTime()
+      }));
+      this.$q
+        .dialog({
+          title: "本日休息設定",
+          message: "是否要取消開放當日預約?",
+          cancel: true,
+          persistent: true
+        })
+        .onOk(async () => {
+          this.loading = true;
+
+          for (let i = 0; i < data.length; i++) {
+            try {
+              await this.$axios.post("/pd/booking", data[i]);
+            } catch (error) {
+              this.$q.notify({
+                type: "negative",
+                message: `伺服器繁忙, 請稍後重試!`,
+                timeout: 500
+              });
+            }
+          }
+          this.loading = false;
+          this.getBooking();
+        });
     },
     openEditForm(form) {
       this.createDialog = true;
