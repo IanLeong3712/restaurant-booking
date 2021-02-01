@@ -98,7 +98,9 @@
           </div>
         </div>
       </div>
-      <span style="color:#888">*預約人數超過 10 人時, 請致電聯絡</span>
+      <span style="color:#888"
+        >*預約人數超過 {{ restaurantInfo.maxSeats }} 人時, 請致電聯絡</span
+      >
       <hr />
       <div class="subtitle">用餐時段</div>
       <template v-if="loading">
@@ -121,11 +123,13 @@
               :key="time.label"
               :label="time.label"
               :disable="
-                time.value + time.current + form.adult + form.children > 10
+                time.value + time.current + form.adult + form.children >
+                  restaurantInfo.maxSeats
               "
               :class="{
                 'text-decoration':
-                  time.value + time.current + form.adult + form.children > 10
+                  time.value + time.current + form.adult + form.children >
+                  restaurantInfo.maxSeats
               }"
             />
           </div>
@@ -183,26 +187,7 @@
 </template>
 
 <script>
-import dayjs from "dayjs";
 import RestaurantInfo from "./components/restaurantInfo";
-const locale = {
-  months: [
-    "一月",
-    "二月",
-    "三月",
-    "四月",
-    "五月",
-    "六月",
-    "七月",
-    "八月",
-    "九月",
-    "十月",
-    "十一月",
-    "十二月"
-  ],
-  days: ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"],
-  daysShort: ["日", "一", "二", "三", "四", "五", "六"]
-};
 export default {
   name: "BookingTime",
   components: { RestaurantInfo },
@@ -221,7 +206,7 @@ export default {
       slide: 1,
       slide2: 1,
       loading: true,
-      peopleSelect: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      peopleSelect: [],
       booking: {},
       form: {
         adult: 2,
@@ -266,6 +251,11 @@ export default {
     }
 
     this.getBooking();
+
+    this.peopleSelect = Array.from(
+      { length: this.restaurantInfo.maxSeats },
+      (_, i) => i + 1
+    );
   },
   watch: {
     "form.date"(value) {

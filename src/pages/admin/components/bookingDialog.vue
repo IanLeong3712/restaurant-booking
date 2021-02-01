@@ -169,7 +169,7 @@ export default {
         comment: ""
       },
       loading: false,
-      peopleSelect: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+      peopleSelect: [],
       timeSelect: [
         "08:30",
         "09:00",
@@ -210,6 +210,11 @@ export default {
       this.form.date = this.data.date;
       this.form.time = this.data.time;
     }
+
+    this.peopleSelect = Array.from(
+      { length: this.restaurantInfo.maxSeats },
+      (_, i) => i + 1
+    );
   },
   watch: {
     dialog() {
@@ -217,6 +222,9 @@ export default {
     }
   },
   computed: {
+    restaurantInfo() {
+      return this.$store.state.restaurant.info;
+    },
     formatDate: {
       get() {
         return this.$dayjs(this.form.date).format("YYYY/MM/DD");
