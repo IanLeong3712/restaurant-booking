@@ -22,7 +22,10 @@
       </q-carousel-slide>
     </q-carousel>
 
-    <div class="flex q-mx-auto column q-px-lg q-mt-md" style="width: 992px">
+    <div
+      class="flex q-mx-auto column q-px-lg q-mt-md"
+      style="width: 992px;max-width: 100%;"
+    >
       <h1 class="text-h4 text-weight-bold" style="color: #2d333f">
         {{ restaurantInfo.name }}
       </h1>
@@ -185,10 +188,10 @@
           :name="i"
           v-for="(image, i) in slideImages2"
           :key="image"
-          style="padding: 0"
+          style="padding: 0;width: 100%"
           class="column no-wrap flex-center"
         >
-          <q-img :src="require(image)" :ratio="4 / 3" />
+          <q-img :src="image" :ratio="4 / 3" />
         </q-carousel-slide>
       </q-carousel>
     </div>
@@ -224,9 +227,13 @@ export default {
         "https://booking.ianleong3712.space/16x9/16x9_06.jpg"
       ],
       slideImages2: [
-        // "https://booking.ianleong3712.space/4x3/4x3_02.jpg",
-        // "https://booking.ianleong3712.space/4x3/4x3_03.jpg",
-        // "https://booking.ianleong3712.space/4x3/4x3_01.jpg"
+        "https://booking.ianleong3712.space/images/AD8O3395.jpg",
+        "https://booking.ianleong3712.space/images/AD8O3397.jpg",
+        "https://booking.ianleong3712.space/images/AD8O3401.jpg",
+        "https://booking.ianleong3712.space/images/AD8O3471.jpg",
+        "https://booking.ianleong3712.space/images/AD8O3622.jpg",
+        "https://booking.ianleong3712.space/images/AD8O3624.jpg",
+        "https://booking.ianleong3712.space/images/AD8O3631.jpg"
       ],
       slide: 1,
       slide2: 1,
