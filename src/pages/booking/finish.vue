@@ -25,7 +25,7 @@
         style="max-width: 636px;width: 100%"
       >
         <h1 class="text-h4 text-weight-bold" style="color: #2d333f">
-          日初午訪 <br />Noon Brunch
+          ☆窩星☆米其林食材鍋物早午餐
         </h1>
 
         <div class="flex row">

@@ -40,7 +40,7 @@
         <q-icon class="q-mr-sm" name="today" />
         <span> 營業時間</span>
       </div>
-      <div style="font-size: 1rem">{{ restaurantInfo.opening }}</div>
+      <div style="font-size: 1rem" v-html="restaurantInfo.opening"></div>
       <hr />
       <div
         class="flex items-center subtitle"

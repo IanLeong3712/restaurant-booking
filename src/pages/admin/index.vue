@@ -125,13 +125,14 @@
             >
               <q-card>
                 <q-card-section
-                  class="flex row "
+                  class="flex row q-py-sm"
                   style="align-items: center;"
                   :class="{
                     'card-grey': props.row.total == 0,
-                    'card-green': props.row.total >= 1 && props.row.total <= 5,
-                    'card-yellow': props.row.total >= 6 && props.row.total <= 9,
-                    'card-red': props.row.total >= 10
+                    'card-green': props.row.total >= 8 && props.row.total <= 15,
+                    'card-yellow':
+                      props.row.total >= 15 && props.row.total <= 22,
+                    'card-red': props.row.total >= 22
                   }"
                 >
                   <div style="font-size: 1.2rem">
@@ -322,15 +323,6 @@ export default {
     this.simplify =
       JSON.parse(window.localStorage.getItem("simplify")) || false;
 
-    if (
-      new Date().getHours() > 15 ||
-      (new Date().getHours() == 15 && new Date().getMinutes() > 30)
-    ) {
-      this.form.date = this.$dayjs(this.form.date.from)
-        .add(1, "day")
-        .format("YYYY/MM/DD");
-    }
-
     this.passwordDialog = false;
     this.getBooking();
   },
@@ -375,6 +367,7 @@ export default {
             a.push({
               date: b.label,
               time: this.$dayjs(data.time).format("HH:mm"),
+              type: data.type === 1 ? "早午餐" : "私藏鍋物",
               name: data.name,
               gender: this.genderOptions[data.gender],
               adult: data.adult,
@@ -449,7 +442,17 @@ export default {
         "13:00",
         "13:30",
         "14:00",
-        "14:30"
+        "14:30",
+        "15:00",
+        "15:30",
+        "16:00",
+        "16:30",
+        "17:00",
+        "17:30",
+        "18:00",
+        "18:30",
+        "19:00",
+        "19:30"
       ];
       let result = timeOptions.map(time => {
         const timestamp = new Date(data.label + " " + time).getTime();
@@ -477,7 +480,6 @@ export default {
     },
     setDayOff(day) {
       const timeOptions = [
-        "08:30",
         "09:00",
         "09:30",
         "10:00",
@@ -489,7 +491,17 @@ export default {
         "13:00",
         "13:30",
         "14:00",
-        "14:30"
+        "14:30",
+        "15:00",
+        "15:30",
+        "16:00",
+        "16:30",
+        "17:00",
+        "17:30",
+        "18:00",
+        "18:30",
+        "19:00",
+        "19:30"
       ];
       const form = {
         adult: 99,
@@ -497,6 +509,7 @@ export default {
         time: undefined,
         status: "DayOff",
         name: "",
+        type: 2,
         email: "",
         phone: "",
         occasion: [],
@@ -542,6 +555,7 @@ export default {
         date: this.$dayjs(form.time),
         time: this.$dayjs(form.time).format("HH:mm"),
         name: form.name,
+        type: form.type,
         email: form.email,
         phone: form.phone,
         occasion: form.occasion,
@@ -613,6 +627,7 @@ export default {
       });
 
       this.booking = data;
+      console.log("🚀 ~ getBooking ~ data", data);
       this.loading = false;
     }
   }

@@ -1,6 +1,27 @@
 <template>
   <q-dialog v-model="dialog" persistent>
-    <q-card style="min-width: 350px">
+    <q-card style="min-width: 350px;">
+      <q-toolbar>
+        <q-btn
+          v-if="data.id"
+          label="取消預約"
+          color="grey"
+          @click="unbooking"
+          :loading="loading"
+          style="margin-right:1rem"
+        />
+        <q-btn
+          :loading="loading"
+          @click="booking"
+          label="保存"
+          color="primary"
+        />
+        <q-space />
+
+        <q-btn flat v-close-popup round dense icon="close" @click="close" />
+      </q-toolbar>
+      <q-separator />
+
       <q-card-section style="max-height: 80vh;" class="scroll">
         <q-form class="row q-col-gutter-md" ref="contactForm">
           <div class="flex row q-mb-sm">
@@ -122,31 +143,6 @@
           </div>
         </q-form>
       </q-card-section>
-
-      <q-separator />
-
-      <q-card-actions align="right">
-        <q-btn
-          v-if="data.id"
-          label="取消預約"
-          color="grey"
-          @click="unbooking"
-          :loading="loading"
-        />
-        <q-btn
-          :loading="loading"
-          flat
-          label="關閉"
-          color="primary"
-          @click="close"
-        />
-        <q-btn
-          :loading="loading"
-          @click="booking"
-          label="保存"
-          color="primary"
-        />
-      </q-card-actions>
     </q-card>
   </q-dialog>
 </template>
@@ -171,7 +167,6 @@ export default {
       loading: false,
       peopleSelect: [],
       timeSelect: [
-        "08:30",
         "09:00",
         "09:30",
         "10:00",
@@ -183,7 +178,17 @@ export default {
         "13:00",
         "13:30",
         "14:00",
-        "14:30"
+        "14:30",
+        "15:00",
+        "15:30",
+        "16:00",
+        "16:30",
+        "17:00",
+        "17:30",
+        "18:00",
+        "18:30",
+        "19:00",
+        "19:30"
       ],
       options: [
         {

@@ -207,6 +207,13 @@ export default {
     if (!this.timeForm) {
       this.$router.replace({ name: "BookingTime" });
     }
+
+    // this.timeForm = {
+    //     adult: 2,
+    //     children: 0,
+    //     date: this.$dayjs().add(1, "days"),
+    //     time: 1628006400000
+    // }
   },
   computed: {
     restaurantInfo() {
@@ -217,6 +224,7 @@ export default {
     async next() {
       const form = {
         ...this.form,
+        type: this.timeForm.type,
         adult: this.timeForm.adult,
         children: this.timeForm.children,
         time: new Date(

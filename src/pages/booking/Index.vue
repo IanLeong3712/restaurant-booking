@@ -1,7 +1,7 @@
 <template>
   <q-page
     class="flex q-mx-auto column "
-    style="max-width: 1600px;background-color: #fff;padding-bottom: 5vh"
+    style="max-width: 1600px;background-color: #fff;padding-bottom: 5vh;"
   >
     <q-carousel
       animated
@@ -22,7 +22,7 @@
       </q-carousel-slide>
     </q-carousel>
 
-    <div class="flex q-mx-auto column q-px-lg" style="max-width: 992px">
+    <div class="flex q-mx-auto column q-px-lg q-mt-md" style="width: 992px">
       <h1 class="text-h4 text-weight-bold" style="color: #2d333f">
         {{ restaurantInfo.name }}
       </h1>
@@ -99,41 +99,65 @@
         </div>
       </div>
       <span style="color:#888"
-        >*預約人數超過 {{ restaurantInfo.maxSeats }} 人時, 請致電聯絡</span
+        >*預約人數超過 {{ orderType.maxSeats }} 人時, 請致電聯絡</span
       >
       <hr />
-      <div class="subtitle">用餐時段</div>
+      <div class="subtitle">用餐類型</div>
+      <div>
+        <q-btn
+          unelevated
+          size="1.1rem"
+          class="q-mr-sm q-px-sm q-mb-sm"
+          label="早午餐"
+          @click="form.type = 1"
+          :outline="form.type != 1"
+          :color="form.type === 1 ? 'primary' : 'grey'"
+          :disable="form.date.day() >= 6"
+          :class="{
+            'text-decoration': form.date.day() >= 6
+          }"
+        />
+        <q-btn
+          unelevated
+          size="1.1rem"
+          class="q-mr-sm q-px-sm q-mb-sm"
+          label="私藏鍋物"
+          @click="form.type = 2"
+          :outline="form.type != 2"
+          :color="form.type === 2 ? 'primary' : 'grey'"
+        />
+      </div>
+
+      <div class="subtitle q-mt-md">用餐時段</div>
       <template v-if="loading">
         <q-skeleton width="100%" height="12rem" />
       </template>
       <template v-else>
-        <template v-for="(timeRange, j) in timeOptions">
-          <div style="color:#888" :key="j + '_label'">
-            {{ timeRange.label }}
-          </div>
-          <div class="q-pa-0 q-mt-sm" :key="j">
-            <q-btn
-              v-for="time in timeRange.options"
-              @click="form.time = time.label"
-              :outline="form.time !== time.label"
-              :color="form.time === time.label ? 'primary' : 'grey'"
-              unelevated
-              size="1.1rem"
-              class="q-mr-sm q-px-sm q-mb-sm"
-              :key="time.label"
-              :label="time.label"
-              :disable="
+        <!-- <div style="color:#888">
+          {{ timeOptions.label }}
+        </div> -->
+        <div class="q-pa-0 q-mt-sm q-mb-sm">
+          <q-btn
+            v-for="time in timeOptions.options"
+            @click="form.time = time.label"
+            :outline="form.time !== time.label"
+            :color="form.time === time.label ? 'primary' : 'grey'"
+            unelevated
+            size="1.1rem"
+            class="q-mr-sm q-px-sm q-mb-sm"
+            :key="time.label"
+            :label="time.label"
+            :disable="
+              time.value + time.current + form.adult + form.children >
+                orderType.maxSeats
+            "
+            :class="{
+              'text-decoration':
                 time.value + time.current + form.adult + form.children >
-                  restaurantInfo.maxSeats
-              "
-              :class="{
-                'text-decoration':
-                  time.value + time.current + form.adult + form.children >
-                  restaurantInfo.maxSeats
-              }"
-            />
-          </div>
-        </template>
+                orderType.maxSeats
+            }"
+          />
+        </div>
 
         <span style="color:#888">*預約時段只保留10分鐘 有特殊需求請致電</span>
         <span style="color:#888"
@@ -152,8 +176,9 @@
       <q-carousel
         animated
         v-model="slide2"
-        arrows
         infinite
+        arrows
+        navigation
         style="width: 100%;height: auto;"
       >
         <q-carousel-slide
@@ -163,7 +188,7 @@
           style="padding: 0"
           class="column no-wrap flex-center"
         >
-          <q-img :src="image" :ratio="4 / 3" />
+          <q-img :src="require(image)" :ratio="4 / 3" />
         </q-carousel-slide>
       </q-carousel>
     </div>
@@ -199,9 +224,9 @@ export default {
         "https://booking.ianleong3712.space/16x9/16x9_06.jpg"
       ],
       slideImages2: [
-        "https://booking.ianleong3712.space/4x3/4x3_02.jpg",
-        "https://booking.ianleong3712.space/4x3/4x3_03.jpg",
-        "https://booking.ianleong3712.space/4x3/4x3_01.jpg"
+        // "https://booking.ianleong3712.space/4x3/4x3_02.jpg",
+        // "https://booking.ianleong3712.space/4x3/4x3_03.jpg",
+        // "https://booking.ianleong3712.space/4x3/4x3_01.jpg"
       ],
       slide: 1,
       slide2: 1,
@@ -209,6 +234,7 @@ export default {
       peopleSelect: [],
       booking: {},
       form: {
+        type: 2,
         adult: 2,
         children: 0,
         date: this.$dayjs().add(1, "days"),
@@ -217,12 +243,46 @@ export default {
 
       timeOptionsDefault: [
         {
-          label: "早上",
-          data: ["08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30"]
+          label: "早午餐",
+          maxSeats: 30,
+          data: [
+            "09:00",
+            "09:30",
+            "10:00",
+            "10:30",
+            "11:00",
+            "11:30",
+            "12:00",
+            "12:30",
+            "13:00",
+            "13:30",
+            "14:00",
+            "14:30"
+          ]
         },
         {
-          label: "中午",
-          data: ["12:00", "12:30", "13:00", "13:30", "14:00", "14:30"]
+          label: "私藏鍋物",
+          maxSeats: 30,
+          data: [
+            "11:00",
+            "11:30",
+            "12:00",
+            "12:30",
+            "13:00",
+            "13:30",
+            "14:00",
+            "14:30",
+            "15:00",
+            "15:30",
+            "16:00",
+            "16:30",
+            "17:00",
+            "17:30",
+            "18:00",
+            "18:30",
+            "19:00",
+            "19:30"
+          ]
         }
       ]
     };
@@ -253,13 +313,14 @@ export default {
     this.getBooking();
 
     this.peopleSelect = Array.from(
-      { length: this.restaurantInfo.maxSeats },
+      { length: this.orderType.maxSeats },
       (_, i) => i + 1
     );
   },
   watch: {
     "form.date"(value) {
       this.getBooking();
+      this.form.type = this.form.date.day() >= 6 ? 2 : 1;
 
       this.form.time = undefined;
     },
@@ -268,11 +329,20 @@ export default {
     },
     "form.children"() {
       this.form.time = undefined;
+    },
+    "form.type"() {
+      this.peopleSelect = Array.from(
+        { length: this.orderType.maxSeats },
+        (_, i) => i + 1
+      );
     }
   },
   computed: {
     restaurantInfo() {
       return this.$store.state.restaurant.info;
+    },
+    orderType() {
+      return this.timeOptionsDefault[this.form.type - 1];
     },
     formatDate: {
       get() {
@@ -284,7 +354,7 @@ export default {
     },
     dateOptions() {
       const result = [];
-      for (let i = 1; i <= 30; i++) {
+      for (let i = 0; i <= 30; i++) {
         result.push(
           this.$dayjs()
             .add(i, "day")
@@ -293,17 +363,17 @@ export default {
       }
       return result;
     },
+    dayOfWeek() {
+      return this.formatDate[this.formatDate.length - 1];
+    },
     timeOptions() {
-      const result = this.timeOptionsDefault.map(time => {
-        time.options = time.data.map(x => ({
-          label: x,
-          value: this.booking[x] || 0,
-          current: 0
-        }));
-        return time;
-      });
+      const result = this.orderType.data.map(x => ({
+        label: x,
+        value: this.booking[x] || 0,
+        current: 0
+      }));
 
-      const _d = [...result[0].options, ...result[1].options];
+      const _d = result;
       _d.forEach((x, i) => {
         try {
           _d[i + 1].current += x.value;
@@ -313,22 +383,25 @@ export default {
         } catch (error) {}
       });
 
-      result.forEach(time => {
-        time.options.map((x, i) => {
-          const data = _d.find(j => j.label === x.label);
-          if (
-            this.$dayjs().isAfter(
-              this.$dayjs(this.form.date.format("YYYY/MM/DD ") + data.label)
-            )
-          ) {
-            x.current = 999;
-          } else {
-            x.current = data.current;
-          }
-        });
+      result.map((x, i) => {
+        const data = _d.find(j => j.label === x.label);
+        x.current = this.$dayjs().isAfter(
+          this.$dayjs(this.form.date.format("YYYY/MM/DD ") + data.label)
+        )
+          ? 999
+          : data.current;
       });
 
-      return result;
+      if (this.form.type == 2 && this.form.date.day() <= 5) {
+        for (let i = 0; i < 12; i++) {
+          result.shift();
+        }
+      }
+
+      return {
+        label: this.orderType.label,
+        options: result
+      };
     }
   },
   methods: {
