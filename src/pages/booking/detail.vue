@@ -172,9 +172,17 @@ export default {
   data() {
     return {
       slideImages: [
-        "https://booking.ianleong3712.space/16x9/16x9_04.jpg",
-        "https://booking.ianleong3712.space/16x9/16x9_05.jpg",
-        "https://booking.ianleong3712.space/16x9/16x9_06.jpg"
+        "https://booking.ianleong3712.space/images/S__42328167.jpg",
+        "https://booking.ianleong3712.space/images/S__4325406.jpg",
+        "https://booking.ianleong3712.space/images/S__42328165.jpg",
+        "https://booking.ianleong3712.space/images/S__42319896.jpg",
+        "https://booking.ianleong3712.space/images/S__4325385.jpg",
+        "https://booking.ianleong3712.space/images/S__4325387.jpg",
+        "https://booking.ianleong3712.space/images/S__4325388.jpg",
+        "https://booking.ianleong3712.space/images/S__4325389.jpg",
+        "https://booking.ianleong3712.space/images/S__4325390.jpg",
+        "https://booking.ianleong3712.space/images/S__4325391.jpg",
+        "https://booking.ianleong3712.space/images/S__4325392.jpg"
       ],
       loading: false,
       slide: 1,

@@ -92,7 +92,6 @@
         </q-btn>
       </q-toolbar>
     </q-header>
-
     <div class="q-pa-md" style="margin-top: -.5rem" v-if="!passwordDialog">
       <template v-for="order in booking">
         <q-table
@@ -101,7 +100,7 @@
           :title="order.label"
           :data="getTimeOptions(order)"
           :columns="columns"
-          :pagination="{ rowsPerPage: 13 }"
+          :pagination="{ rowsPerPage: 0 }"
           row-key="name"
           hide-header
           hide-bottom
@@ -129,10 +128,10 @@
                   style="align-items: center;"
                   :class="{
                     'card-grey': props.row.total == 0,
-                    'card-green': props.row.total >= 8 && props.row.total <= 15,
+                    'card-green': props.row.total > 0 && props.row.total <= 10,
                     'card-yellow':
-                      props.row.total >= 15 && props.row.total <= 22,
-                    'card-red': props.row.total >= 22
+                      props.row.total >= 11 && props.row.total <= 20,
+                    'card-red': props.row.total >= 21
                   }"
                 >
                   <div style="font-size: 1.2rem">
@@ -310,7 +309,31 @@ export default {
         { name: "occasion", label: "目的" },
         { name: "comment", label: "備註" }
       ],
-      genderOptions: ["小姐", "先生", ""]
+      genderOptions: ["小姐", "先生", ""],
+      timeOptions: [
+        "09:00",
+        "09:30",
+        "10:00",
+        "10:30",
+        "11:00",
+        "11:30",
+        "12:00",
+        "12:30",
+        "13:00",
+        "13:30",
+        "14:00",
+        "14:30",
+        "15:00",
+        "15:30",
+        "16:00",
+        "16:30",
+        "17:00",
+        "17:30",
+        "18:00",
+        "18:30",
+        "19:00",
+        "19:30"
+      ]
     };
   },
 
@@ -367,7 +390,6 @@ export default {
             a.push({
               date: b.label,
               time: this.$dayjs(data.time).format("HH:mm"),
-              type: data.type === 1 ? "早午餐" : "私藏鍋物",
               name: data.name,
               gender: this.genderOptions[data.gender],
               adult: data.adult,
@@ -380,7 +402,6 @@ export default {
           });
         return a;
       }, []);
-
       const csvExporter = new ExportToCsv({
         showLabels: true,
         useTextFile: false,
@@ -407,7 +428,7 @@ export default {
         const date = this.$dayjs(time);
         this.editForm = {
           date,
-          time: date.format("hh:mm")
+          time: date.format("HH:mm")
         };
       }
       this.createDialog = true;
@@ -429,32 +450,7 @@ export default {
       this.form.date = this.form.proxyDate;
     },
     getTimeOptions(data) {
-      const timeOptions = [
-        "08:30",
-        "09:00",
-        "09:30",
-        "10:00",
-        "10:30",
-        "11:00",
-        "11:30",
-        "12:00",
-        "12:30",
-        "13:00",
-        "13:30",
-        "14:00",
-        "14:30",
-        "15:00",
-        "15:30",
-        "16:00",
-        "16:30",
-        "17:00",
-        "17:30",
-        "18:00",
-        "18:30",
-        "19:00",
-        "19:30"
-      ];
-      let result = timeOptions.map(time => {
+      let result = this.timeOptions.map(time => {
         const timestamp = new Date(data.label + " " + time).getTime();
         const groupData = data.data.filter(x => x.time === timestamp);
         const adult = groupData.reduce((a, b) => a + b.adult, 0);
@@ -479,30 +475,6 @@ export default {
       return password === "NjchITY3Kio=";
     },
     setDayOff(day) {
-      const timeOptions = [
-        "09:00",
-        "09:30",
-        "10:00",
-        "10:30",
-        "11:00",
-        "11:30",
-        "12:00",
-        "12:30",
-        "13:00",
-        "13:30",
-        "14:00",
-        "14:30",
-        "15:00",
-        "15:30",
-        "16:00",
-        "16:30",
-        "17:00",
-        "17:30",
-        "18:00",
-        "18:30",
-        "19:00",
-        "19:30"
-      ];
       const form = {
         adult: 99,
         children: 99,
@@ -517,7 +489,7 @@ export default {
         comment: "[本日休息]",
         token: this.tokenString
       };
-      const data = timeOptions.map(x => ({
+      const data = this.timeOptions.map(x => ({
         ...form,
         time: new Date(`${day} ${x}`).getTime()
       }));
@@ -605,10 +577,19 @@ export default {
         startAt = this.$dayjs(this.form.date.from);
         endAt = this.$dayjs(this.form.date.to);
       }
+
       const res = await this.$axios.post("/pd/booking/list", {
         token,
-        startAt: startAt.toDate().getTime(),
-        endAt: endAt.toDate().getTime()
+        startAt: startAt
+          .hour(0)
+          .minute(0)
+          .toDate()
+          .getTime(),
+        endAt: endAt
+          .hour(23)
+          .minute(59)
+          .toDate()
+          .getTime()
       });
 
       let data = [];
@@ -627,7 +608,6 @@ export default {
       });
 
       this.booking = data;
-      console.log("🚀 ~ getBooking ~ data", data);
       this.loading = false;
     }
   }

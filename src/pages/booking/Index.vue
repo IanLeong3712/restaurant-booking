@@ -115,9 +115,9 @@
           @click="form.type = 1"
           :outline="form.type != 1"
           :color="form.type === 1 ? 'primary' : 'grey'"
-          :disable="form.date.day() >= 6"
+          :disable="isWeekend"
           :class="{
-            'text-decoration': form.date.day() >= 6
+            'text-decoration': isWeekend
           }"
         />
         <q-btn
@@ -222,9 +222,17 @@ export default {
   data() {
     return {
       slideImages: [
-        "https://booking.ianleong3712.space/16x9/16x9_04.jpg",
-        "https://booking.ianleong3712.space/16x9/16x9_05.jpg",
-        "https://booking.ianleong3712.space/16x9/16x9_06.jpg"
+        "https://booking.ianleong3712.space/images/S__42328167.jpg",
+        "https://booking.ianleong3712.space/images/S__4325406.jpg",
+        "https://booking.ianleong3712.space/images/S__42328165.jpg",
+        "https://booking.ianleong3712.space/images/S__42319896.jpg",
+        "https://booking.ianleong3712.space/images/S__4325385.jpg",
+        "https://booking.ianleong3712.space/images/S__4325387.jpg",
+        "https://booking.ianleong3712.space/images/S__4325388.jpg",
+        "https://booking.ianleong3712.space/images/S__4325389.jpg",
+        "https://booking.ianleong3712.space/images/S__4325390.jpg",
+        "https://booking.ianleong3712.space/images/S__4325391.jpg",
+        "https://booking.ianleong3712.space/images/S__4325392.jpg"
       ],
       slideImages2: [
         "https://booking.ianleong3712.space/images/AD8O3395.jpg",
@@ -325,9 +333,9 @@ export default {
     );
   },
   watch: {
-    "form.date"(value) {
+    "form.date"() {
       this.getBooking();
-      this.form.type = this.form.date.day() >= 6 ? 2 : 1;
+      this.form.type = this.isWeekend ? 2 : 1;
 
       this.form.time = undefined;
     },
@@ -370,8 +378,8 @@ export default {
       }
       return result;
     },
-    dayOfWeek() {
-      return this.formatDate[this.formatDate.length - 1];
+    isWeekend() {
+      return this.form.date.day() === 0 || this.form.date.day() === 6;
     },
     timeOptions() {
       const result = this.orderType.data.map(x => ({
@@ -399,7 +407,7 @@ export default {
           : data.current;
       });
 
-      if (this.form.type == 2 && this.form.date.day() <= 5) {
+      if (this.form.type == 2 && !this.isWeekend) {
         for (let i = 0; i < 12; i++) {
           result.shift();
         }

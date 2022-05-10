@@ -11,7 +11,7 @@
     "build:pwa": "quasar build -m pwa",
     "lint": "eslint --ext .js,.vue ./",
     "test": "echo \"No test specified\" && exit 0",
-    "deploy": "quasar build && scp -r ./dist/spa/ ubuntu@173.82.45.3:/data/booking"
+    "deploy": "quasar build && scp -r ./dist/spa/ ianleong3712@173.82.45.3:/data/booking"
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
